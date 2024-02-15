@@ -15,7 +15,12 @@ how to connect different addresses?
 each time that some one pay 1 eth to contract address contract will add it to Semphore group.
 user need to provide group id for auction.
 
+reveal time
+user should reveal its identities and provide an address to send the nft to him if he won or send it's ETH back if he lost 
+
 so it would be 10 different identity that paid 1 eth. then at the end users reveal their identity by signing a transaction and show that how many ether their paid. anyone who paid more would be the winner.
+
+
 
 ## break down
 
