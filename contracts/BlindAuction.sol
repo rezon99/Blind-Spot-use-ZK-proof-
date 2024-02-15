@@ -1,19 +1,11 @@
-# Blind-Spot-use-ZK-proof-
-
-Auction uses ZK proof to hide the amount somma of bids and allows the winner to purchase NFT for his bid.
-
-user pay to vault address with different batch of cretain amount of number. e.g he want to pay 10 ether and he should pay 1 ether with 10 different address.
-when user pay that amount it will also give a signature with a nullifier that create an Identity for user like semaphore.
-so every time that user pays contract should add 1 ether to it's state
-at the ending of the deadline verifier should return the winner
-
-## project structure
-
-``` solidity
+// SPDX-License-Identifier: MIT 
 pragma solidity ^0.8.0;
 
 interface IVerifier {
-    function verifyProof(bytes memory _proof, uint256[] memory _input) external returns (bool);
+    function verifyProof(
+        bytes memory _proof,
+        uint256[] memory _input
+    ) external returns (bool);
 }
 
 contract BlindAuction {
@@ -24,14 +16,14 @@ contract BlindAuction {
     bool public ended;
     uint public highestBid;
     address public highestBidder;
-    
+
     // This represents the total eth contributed by each bidder without revealing individual amounts
     mapping(address => uint) public contributions;
     // This will represent commitments which are a hash of the amount + secret
     mapping(address => bytes32) public commitments;
     // Nullifiers are used to prevent double spending
     mapping(bytes32 => bool) public nullifiers;
-    
+
     event BidMade(address bidder, uint amount);
     event AuctionEnded(address winner, uint amount);
 
@@ -43,12 +35,18 @@ contract BlindAuction {
     }
 
     modifier onlyBefore(uint _time) {
-        require(block.timestamp < _time, "Action can only be performed before a certain time.");
+        require(
+            block.timestamp < _time,
+            "Action can only be performed before a certain time."
+        );
         _;
     }
 
     modifier onlyAfter(uint _time) {
-        require(block.timestamp >= _time, "Action can only be performed after a certain time.");
+        require(
+            block.timestamp >= _time,
+            "Action can only be performed after a certain time."
+        );
         _;
     }
 
@@ -65,21 +63,20 @@ contract BlindAuction {
         bytes32 _nullifier,
         bytes32 _secret,
         bytes memory _proof
-    )
-        public
-        onlyAfter(biddingEnd)
-        onlyBefore(revealEnd)
-    {
+    ) public onlyAfter(biddingEnd) onlyBefore(revealEnd) {
         bytes32 commitment = keccak256(abi.encodePacked(_bid, _secret));
         // Verifies the commitment matches
-        require(commitments[msg.sender] == commitment, "Bid does not match commitment");
+        require(
+            commitments[msg.sender] == commitment,
+            "Bid does not match commitment"
+        );
         // Verifies the proof of the provided bid amount
         require(verifier.verifyProof(_proof, [_bid]), "Invalid proof");
         // Check if the nullifier has been used
         require(!nullifiers[_nullifier], "Nullifier has been used");
-        
+
         nullifiers[_nullifier] = true;
-        
+
         if (_bid > highestBid) {
             highestBid = _bid;
             highestBidder = msg.sender;
@@ -105,5 +102,3 @@ contract BlindAuction {
         }
     }
 }
-```
-
