@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "semphore-app/node_modules/@semaphore-protocol/contracts/interfaces/ISemaphore.sol";
+import "@semaphore-protocol/contracts/interfaces/ISemaphore.sol";
 
 contract BlindAuction {
+    uint256 public totalSupply;
+    mapping(address => uint256) public balanceOf;
     address public owner; // Auction owner
     uint256 public auctionEndTime; // Auction end time
     uint256 public highestBid; // Highest bid amount
@@ -24,7 +26,11 @@ contract BlindAuction {
     mapping(address => Bid) public bids;
 
     // Constructor: Initialize auction parameters
-    constructor(uint256 _durationMinutes, address semaphoreAddress, uint256 _groupId) {
+    constructor(
+        uint256 _durationMinutes,
+        address semaphoreAddress,
+        uint256 _groupId
+    ) {
         owner = msg.sender;
         auctionEndTime = block.timestamp + _durationMinutes * 1 minutes;
         semaphore = ISemaphore(semaphoreAddress);
@@ -78,7 +84,9 @@ contract BlindAuction {
     }
 
     // Function to join the semaphore group
-    function joinSemaphoreGroup(uint256 identityCommitment) external {
+    function joinSemaphoreGroup(uint256 identityCommitment) external payable {
+        auctionNotEnded();
+        require(msg.value == 1 ether, "You need to pay 1 ether for creating 1 Identity commitment.");
         semaphore.addMember(groupId, identityCommitment);
     }
 
