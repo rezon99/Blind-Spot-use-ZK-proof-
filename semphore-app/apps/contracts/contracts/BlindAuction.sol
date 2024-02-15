@@ -1,6 +1,7 @@
-// BlindAuction.sol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
+
+import "semphore-app/node_modules/@semaphore-protocol/contracts/interfaces/ISemaphore.sol";
 
 contract BlindAuction {
     address public owner; // Auction owner
@@ -8,6 +9,9 @@ contract BlindAuction {
     uint256 public highestBid; // Highest bid amount
     address public highestBidder; // Highest bidder
     bool public ended; // Auction ended flag
+
+    ISemaphore public semaphore;
+    uint256 public groupId;
 
     // Struct to store user bids
     struct Bid {
@@ -20,9 +24,12 @@ contract BlindAuction {
     mapping(address => Bid) public bids;
 
     // Constructor: Initialize auction parameters
-    constructor(uint256 _durationMinutes) {
+    constructor(uint256 _durationMinutes, address semaphoreAddress, uint256 _groupId) {
         owner = msg.sender;
         auctionEndTime = block.timestamp + _durationMinutes * 1 minutes;
+        semaphore = ISemaphore(semaphoreAddress);
+        groupId = _groupId;
+        semaphore.createGroup(groupId, 20, address(this));
     }
 
     // Modifier: Auction not ended
@@ -68,5 +75,20 @@ contract BlindAuction {
 
         ended = true;
         payable(owner).transfer(highestBid);
+    }
+
+    // Function to join the semaphore group
+    function joinSemaphoreGroup(uint256 identityCommitment) external {
+        semaphore.addMember(groupId, identityCommitment);
+    }
+
+    // Function to send feedback to the semaphore contract
+    function sendFeedback(
+        uint256 feedback,
+        uint256 merkleTreeRoot,
+        uint256 nullifierHash,
+        uint256[8] calldata proof
+    ) external {
+        semaphore.verifyProof(groupId, merkleTreeRoot, feedback, nullifierHash, groupId, proof);
     }
 }
