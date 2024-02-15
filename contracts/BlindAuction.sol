@@ -71,7 +71,7 @@ contract BlindAuction {
             "Bid does not match commitment"
         );
         // Verifies the proof of the provided bid amount
-        require(verifier.verifyProof(_proof, [_bid]), "Invalid proof");
+        require(verifier.verifyProof(_proof, new uint256[](_bid)), "Invalid proof");
         // Check if the nullifier has been used
         require(!nullifiers[_nullifier], "Nullifier has been used");
 
