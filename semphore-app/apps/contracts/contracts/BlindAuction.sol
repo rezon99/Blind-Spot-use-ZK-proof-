@@ -10,7 +10,9 @@ contract BlindAuction {
     uint256 public auctionEndTime; // Auction end time
     uint256 public highestBid; // Highest bid amount
     address public highestBidder; // Highest bidder
-    bool public ended; // Auction ended flag
+
+    bool public auction_proof_time; // Auction auction_proof_time flag
+    bool public auction_ended; // Auction ended flag
 
     ISemaphore public semaphore;
     uint256 public groupId;
@@ -26,11 +28,7 @@ contract BlindAuction {
     mapping(address => Bid) public bids;
 
     // Constructor: Initialize auction parameters
-    constructor(
-        uint256 _durationMinutes,
-        address semaphoreAddress,
-        uint256 _groupId
-    ) {
+    constructor(uint256 _durationMinutes, address semaphoreAddress, uint256 _groupId) {
         owner = msg.sender;
         auctionEndTime = block.timestamp + _durationMinutes * 1 minutes;
         semaphore = ISemaphore(semaphoreAddress);
@@ -39,8 +37,13 @@ contract BlindAuction {
     }
 
     // Modifier: Auction not ended
+    modifier auction_proof_time_NotEnded() {
+        require(!auction_proof_time, "auction_proof_time has ended");
+        _;
+    }
+    // Modifier: Auction not ended
     modifier auctionNotEnded() {
-        require(!ended, "Auction has ended");
+        require(!auction_ended, "Auction has ended");
         _;
     }
 
@@ -53,17 +56,10 @@ contract BlindAuction {
     }
 
     // Reveal the bid
-    function revealBid(
-        uint256 _amount,
-        bytes32 _nullifier
-    ) public auctionNotEnded {
+    function revealBid(uint256 _amount, bytes32 _nullifier) public auctionNotEnded {
         require(bids[msg.sender].amount > 0, "No bid found");
         require(!bids[msg.sender].revealed, "Bid already revealed");
-        require(
-            keccak256(abi.encodePacked(_amount, _nullifier)) ==
-                bids[msg.sender].nullifier,
-            "Invalid nullifier"
-        );
+        require(keccak256(abi.encodePacked(_amount, _nullifier)) == bids[msg.sender].nullifier, "Invalid nullifier");
 
         bids[msg.sender].revealed = true;
 
@@ -77,33 +73,25 @@ contract BlindAuction {
     function endAuction() public {
         require(msg.sender == owner, "Only owner can end the auction");
         require(block.timestamp >= auctionEndTime, "Auction not yet ended");
-        require(!ended, "Auction already ended");
+        require(!auction_ended, "Auction already ended");
 
-        ended = true;
+        auction_ended = true;
         payable(owner).transfer(highestBid);
     }
 
     // Function to join the semaphore group
-    function joinSemaphoreGroup(uint256 identityCommitment) external payable {
-        auctionNotEnded();
+    function joinSemaphoreGroup(uint256 identityCommitment) external payable auction_proof_time_NotEnded {
         require(msg.value == 1 ether, "You need to pay 1 ether for creating 1 Identity commitment.");
         semaphore.addMember(groupId, identityCommitment);
     }
 
     // Function to send feedback to the semaphore contract
     function reveal_Stacked_ETH_Based_On_Identity_Count(
-        uint256 feedback,
+        uint256 signal,
         uint256 merkleTreeRoot,
         uint256 nullifierHash,
         uint256[8] calldata proof
     ) external {
-        semaphore.verifyProof(
-            groupId,
-            merkleTreeRoot,
-            signal,
-            nullifierHash,
-            groupId,
-            proof
-        );
+        semaphore.verifyProof(groupId, merkleTreeRoot, signal, nullifierHash, groupId, proof);
     }
 }
