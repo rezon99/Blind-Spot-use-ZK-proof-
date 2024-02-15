@@ -91,12 +91,19 @@ contract BlindAuction {
     }
 
     // Function to send feedback to the semaphore contract
-    function sendFeedback(
+    function reveal_Stacked_ETH_Based_On_Identity_Count(
         uint256 feedback,
         uint256 merkleTreeRoot,
         uint256 nullifierHash,
         uint256[8] calldata proof
     ) external {
-        semaphore.verifyProof(groupId, merkleTreeRoot, feedback, nullifierHash, groupId, proof);
+        semaphore.verifyProof(
+            groupId,
+            merkleTreeRoot,
+            signal,
+            nullifierHash,
+            groupId,
+            proof
+        );
     }
 }
