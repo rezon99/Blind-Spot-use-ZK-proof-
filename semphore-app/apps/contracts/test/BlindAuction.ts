@@ -14,7 +14,14 @@ describe("BlindAuction", () => {
 
     const groupId = "100"
     const group = new Group(groupId)
-    const users: Identity[] = []
+
+    const user1_mother_addresse: string = "" // FIXME this should be hardhat address
+    const user2_mother_addresses: string = "" // FIXME this should be hardhat address
+
+    const user1_addresses: string[] = []
+    const user2_addresses: string[] = []
+    const user1_identities: Identity[] = []
+    const user2_identities: Identity[] = []
 
     before(async () => {
         const { semaphore } = await run("deploy:semaphore", {
@@ -27,33 +34,18 @@ describe("BlindAuction", () => {
             group: groupId
         })
         semaphoreContract = semaphore
-
-        users.push(new Identity())
-        users.push(new Identity())
-    })
-
-    describe("# joinGroup", () => {
-        it("Should allow users to join the group", async () => {
-            for await (const [i, user] of users.entries()) {
-                const transaction = blindAuctionContract.joinSemaphoreGroup(user.commitment)
-
-                group.addMember(user.commitment)
-
-                await expect(transaction)
-                    .to.emit(semaphoreContract, "MemberAdded")
-                    .withArgs(groupId, i, user.commitment, group.root)
-            }
-        })
     })
 
     it("should create group", async () => {
         // Implement test for users joining the semaphore group
     })
     // 0.01ETH is for future gas fees
-    it("The user creates 10 different Ethereum addresses and send 1.01ETH to each one", async () => {
+    it("user creates 10 different Ethereum addresses and send 1.01ETH to each one", async () => {
+        user1_identities.push(new Identity())
+        user2_identities.push(new Identity())
         // Implement test for users joining the semaphore group
         // used later to prove how many times they’ve placed a bid without revealing their actual Ethereum addresses.
-        it("The user generates a Semaphore identity for each address", async () => {
+        it("user generates a Semaphore identity for each address", async () => {
             // Implement test for users joining the semaphore group
         })
         // Trapdoor: private, known only by user    in this case 1ETH user address
@@ -81,11 +73,25 @@ describe("BlindAuction", () => {
         })
     })
 
+    describe("# joinGroup", () => {
+        it("Should allow users to join the group", async () => {
+            for await (const [i, user] of identities.entries()) {
+                const transaction = blindAuctionContract.joinSemaphoreGroup(user.commitment)
+
+                group.addMember(user.commitment)
+
+                await expect(transaction)
+                    .to.emit(semaphoreContract, "MemberAdded")
+                    .withArgs(groupId, i, user.commitment, group.root)
+            }
+        })
+    })
+
     it("should allow users to join the semaphore group", async () => {
         // Implement test for users joining the semaphore group
     })
 
-    it("should allow users to place blind bids", async () => {
+    it("should allow users to prove how much they bid with prooving they own the identities", async () => {
         // Implement test for users placing blind bids
     })
 
@@ -93,6 +99,10 @@ describe("BlindAuction", () => {
         const wasmFilePath = `${config.paths.build["snark-artifacts"]}/semaphore.wasm`
         const zkeyFilePath = `${config.paths.build["snark-artifacts"]}/semaphore.zkey`
         // Implement test to verify the total amount sent for each bid
+    })
+
+    it("if user didn't reveal in the auction_Deadline user after proof their identities he should be able to withdorw it's fond", async () => {
+        // Implement test for users revealing their bids
     })
 
     it("should allow users to reveal their bids", async () => {
@@ -105,9 +115,5 @@ describe("BlindAuction", () => {
 
     it("should correctly determine the winner of the auction", async () => {
         // Implement test to determine the winner of the auction
-    })
-
-    it("should maintain user privacy throughout the auction process", async () => {
-        // Implement test to ensure user privacy is maintained
     })
 })
