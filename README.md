@@ -2,108 +2,61 @@
 
 Auction uses ZK proof to hide the amount somma of bids and allows the winner to purchase NFT for his bid.
 
-user pay to vault address with different batch of cretain amount of number. e.g he want to pay 10 ether and he should pay 1 ether with 10 different address.
-when user pay that amount it will also give a signature with a nullifier that create an Identity for user like semaphore.
-so every time that user pays contract should add 1 ether to it's state
-at the ending of the deadline verifier should return the winner
 
-## project structure
+I want to create a create a blind auction dapp.
+for maintaining the privacy user should send it's bid with up to 50 different address to contract address. for example user want to bid 10ETH so he need to pay 1ETH with 10 different address on 40 other spot would be 0.
 
-``` solidity
-pragma solidity ^0.8.0;
+for user will use it's semaphore Identity to prove that he paid 10 time.
 
-interface IVerifier {
-    function verifyProof(bytes memory _proof, uint256[] memory _input) external returns (bool);
-}
+so send 1 eth and in tx message sign it with your address and nullifier to be able to prove that you paid 1 ether
 
-contract BlindAuction {
-    address payable public beneficiary;
-    IVerifier public verifier; // The verifier contract for ZK proofs
-    uint public biddingEnd;
-    uint public revealEnd;
-    bool public ended;
-    uint public highestBid;
-    address public highestBidder;
-    
-    // This represents the total eth contributed by each bidder without revealing individual amounts
-    mapping(address => uint) public contributions;
-    // This will represent commitments which are a hash of the amount + secret
-    mapping(address => bytes32) public commitments;
-    // Nullifiers are used to prevent double spending
-    mapping(bytes32 => bool) public nullifiers;
-    
-    event BidMade(address bidder, uint amount);
-    event AuctionEnded(address winner, uint amount);
+how to connect different addresses?
 
-    constructor(uint _biddingTime, uint _revealTime, IVerifier _verifier) {
-        beneficiary = payable(msg.sender);
-        verifier = _verifier;
-        biddingEnd = block.timestamp + _biddingTime;
-        revealEnd = biddingEnd + _revealTime;
-    }
+each time that some one pay 1 eth to contract address contract will add it to Semphore group.
+user need to provide group id for auction.
 
-    modifier onlyBefore(uint _time) {
-        require(block.timestamp < _time, "Action can only be performed before a certain time.");
-        _;
-    }
+so it would be 10 different identity that paid 1 eth. then at the end users reveal their identity by signing a transaction and show that how many ether their paid. anyone who paid more would be the winner.
 
-    modifier onlyAfter(uint _time) {
-        require(block.timestamp >= _time, "Action can only be performed after a certain time.");
-        _;
-    }
+## break down
 
-    function bid(bytes32 _commitment) public payable onlyBefore(biddingEnd) {
-        // Each bid should be exactly 1 ether
-        require(msg.value == 1 ether, "Must send exactly 1 Ether");
-        commitments[msg.sender] = _commitment;
-        contributions[msg.sender] += msg.value;
-        emit BidMade(msg.sender, msg.value);
-    }
 
-    function reveal(
-        uint _bid,
-        bytes32 _nullifier,
-        bytes32 _secret,
-        bytes memory _proof
-    )
-        public
-        onlyAfter(biddingEnd)
-        onlyBefore(revealEnd)
-    {
-        bytes32 commitment = keccak256(abi.encodePacked(_bid, _secret));
-        // Verifies the commitment matches
-        require(commitments[msg.sender] == commitment, "Bid does not match commitment");
-        // Verifies the proof of the provided bid amount
-        require(verifier.verifyProof(_proof, [_bid]), "Invalid proof");
-        // Check if the nullifier has been used
-        require(!nullifiers[_nullifier], "Nullifier has been used");
-        
-        nullifiers[_nullifier] = true;
-        
-        if (_bid > highestBid) {
-            highestBid = _bid;
-            highestBidder = msg.sender;
-        }
-    }
+Creating a blind auction DApp with privacy considerations is an interesting challenge! Let's break down the steps to achieve this:
 
-    function auctionEnd() public onlyAfter(revealEnd) {
-        require(!ended, "Auction end has already been called");
-        ended = true;
-        beneficiary.transfer(highestBid);
-        contributions[highestBidder] -= highestBid;
-        emit AuctionEnded(highestBidder, highestBid);
-    }
+1. **Smart Contract Design**:
+    - You'll need a smart contract that handles the auction logic, including bid submission, verification, and winner determination.
+    - Define a struct to store each user's bids, including the amount and the associated addresses.
+    - Use a mapping to associate group IDs with user bids.
 
-    // Function to withdraw your contributions except the winning bid
-    function withdraw() public {
-        uint amount = contributions[msg.sender];
-        if (amount > 0) {
-            contributions[msg.sender] = 0;
-            if (!payable(msg.sender).send(amount)) {
-                contributions[msg.sender] = amount;
-            }
-        }
-    }
-}
-```
+2. **Bid Submission**:
+    - Users submit their bids by sending 1 ETH from up to 50 different addresses.
+    - Each bid includes the user's address and a unique nullifier (a random value).
+    - The contract verifies that the total amount sent is 1 ETH.
 
+3. **Semaphore Identity**:
+    - Users prove their bids using their semaphore identity.
+    - When submitting a bid, users sign a message containing their address and nullifier.
+    - The contract verifies the signature against the user's address.
+
+4. **Grouping Bids**:
+    - Each time someone pays 1 ETH to the contract address, the contract adds it to a semaphore group.
+    - The group ID is associated with the auction.
+
+5. **Revealing Bids**:
+    - At the end of the auction, users reveal their identity by signing a transaction.
+    - They provide the number of ETH they paid (e.g., 10 times 1 ETH).
+    - The contract verifies the revealed amount against the stored bids.
+
+6. **Determining the Winner**:
+    - The user who paid the most ETH wins the auction.
+    - The contract transfers the auctioned item to the winner.
+
+7. **Privacy Considerations**:
+    - Users' bids are private during the auction.
+    - The semaphore identity ensures that only valid bids are considered.
+    - The nullifier prevents double-spending.
+
+8. **Connecting Different Addresses**:
+    - To connect different addresses, you can use an interface between two smart contracts.
+    - Deploy a separate contract (e.g., `XYZ`) that contains the relevant methods.
+    - In your auction contract (e.g., `ABC`), store the address of the deployed `XYZ` contract.
+    - Call the methods of `XYZ` from `ABC` using the stored address.

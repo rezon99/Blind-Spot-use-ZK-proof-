@@ -1,26 +1,9 @@
 import "hashes/sha256/512bitPacked" as sha256packed;
 
-// def main(private field a, private field b, private field c, private field d) -> field[2] {
-//     field[2] h = sha256packed([a, b, c, d]);
-//     return h;
-// }
-
-
-// Our ZoKrates program accepting secret bids and a public total
 def main(private field[10] secretBids, field publicTotal) -> bool {
     field total = 0;
-    for u32 i in 0..10 do // 11 key
-        total += secretBids[i];
-    endfor
+    for u32 i in 0..10 {
+        total = total + secretBids[i];
+    }
     return total == publicTotal;
 }
-
-
-def main(private field a, field b) {
-    assert(a  * a == b);
-    return;
-}
-
-// def main(field[2] value, private field[4] preimage) -> bool {
-//     return sha256packed(preimage) == value;
-// }
