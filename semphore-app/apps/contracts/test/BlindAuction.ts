@@ -3,23 +3,28 @@ import { Identity } from "@semaphore-protocol/identity"
 import { generateProof } from "@semaphore-protocol/proof"
 import { expect } from "chai"
 import { formatBytes32String } from "ethers/lib/utils"
-import { run } from "hardhat"
+import { ethers, run } from "hardhat"
 // @ts-ignore: typechain folder will be generated after contracts compilation
 import { BlindAuction } from "../build/typechain"
 import { config } from "../package.json"
 
-describe("BlindAuction", () => {
+describe("BlindAuction", async () => {
     let blindAuctionContract: BlindAuction
     let semaphoreContract: string
 
     const groupId = "100"
     const group = new Group(groupId)
 
-    const user1_mother_addresse: string = "" // FIXME this should be hardhat address
-    const user2_mother_addresses: string = "" // FIXME this should be hardhat address
+    const [
+        user1_mother_addresse,
+        user2_mother_addresses,
+        user1_addresses1,
+        user1_addresses2,
+        user1_addresses3,
+        user2_addresses1,
+        user2_addresses2
+    ] = await ethers.getSigners()
 
-    const user1_addresses: string[] = []
-    const user2_addresses: string[] = []
     const user1_identities: Identity[] = []
     const user2_identities: Identity[] = []
 
@@ -39,14 +44,29 @@ describe("BlindAuction", () => {
     it("should create group", async () => {
         // Implement test for users joining the semaphore group
     })
-    // 0.01ETH is for future gas fees
-    it("user creates 10 different Ethereum addresses and send 1.01ETH to each one", async () => {
+    it("should creates 3 Identity based on user 1 addresses and 2 identity for user2", async () => {
         user1_identities.push(new Identity())
         user2_identities.push(new Identity())
         // Implement test for users joining the semaphore group
         // used later to prove how many times they’ve placed a bid without revealing their actual Ethereum addresses.
-        it("user generates a Semaphore identity for each address", async () => {
+        it("FIXME user generates a Semaphore identity for each address", async () => {
             // Implement test for users joining the semaphore group
+        })
+        // FIXME use linkIdentityToMotherAddr
+        // FIXME use getMotherAddressOfIdentity
+        
+        describe("# joinGroup", () => {
+            it("Should allow users to join the group if paid 1 ether", async () => {
+                for await (const [i, user] of user1_identities.entries()) {
+                    const transaction = blindAuctionContract.joinSemaphoreGroup(user.commitment)
+
+                    group.addMember(user.commitment)
+
+                    await expect(transaction)
+                        .to.emit(semaphoreContract, "MemberAdded")
+                        .withArgs(groupId, i, user.commitment, group.root)
+                }
+            })
         })
         // Trapdoor: private, known only by user    in this case 1ETH user address
         // Nullifier: private, known only by user   in this case user mother address that he want to get NFT with it
