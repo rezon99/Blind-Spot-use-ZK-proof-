@@ -16,13 +16,13 @@ describe("BlindAuction", async () => {
     const group = new Group(groupId)
 
     const [
-        user1_mother_addresse,
-        user2_mother_addresses,
-        user1_addresses1,
-        user1_addresses2,
-        user1_addresses3,
-        user2_addresses1,
-        user2_addresses2
+        user1_mother_wallet,
+        user2_mother_wallet,
+        user1_walet1,
+        user1_walet2,
+        user1_walet3,
+        user2_walet1,
+        user2_walet2
     ] = await ethers.getSigners()
 
     const user1_identities: Identity[] = []
@@ -45,6 +45,24 @@ describe("BlindAuction", async () => {
         // Implement test for users joining the semaphore group
     })
     it("should creates 3 Identity based on user 1 addresses and 2 identity for user2", async () => {
+        // this will sign the message(mother wallet address) with user1_walet1 private key then it will create an identity with it.
+        const user1_identity1 = new Identity(
+            await user1_walet1.signMessage(ethers.utils.arrayify(ethers.utils.hashMessage(user1_walet1.address)))
+        )
+        const user1_identity2 = new Identity(
+            await user1_walet1.signMessage(ethers.utils.arrayify(ethers.utils.hashMessage(user1_walet2.address)))
+        )
+        const user1_identity3 = new Identity(
+            await user1_walet1.signMessage(ethers.utils.arrayify(ethers.utils.hashMessage(user1_walet3.address)))
+        )
+
+        const user2_identity1 = new Identity(
+            await user1_walet1.signMessage(ethers.utils.arrayify(ethers.utils.hashMessage(user2_walet1.address)))
+        )
+        const user2_identity2 = new Identity(
+            await user1_walet1.signMessage(ethers.utils.arrayify(ethers.utils.hashMessage(user2_walet2.address)))
+        )
+
         user1_identities.push(new Identity())
         user2_identities.push(new Identity())
         // Implement test for users joining the semaphore group
@@ -54,7 +72,7 @@ describe("BlindAuction", async () => {
         })
         // FIXME use linkIdentityToMotherAddr
         // FIXME use getMotherAddressOfIdentity
-        
+
         describe("# joinGroup", () => {
             it("Should allow users to join the group if paid 1 ether", async () => {
                 for await (const [i, user] of user1_identities.entries()) {
