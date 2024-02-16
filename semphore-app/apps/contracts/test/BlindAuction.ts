@@ -47,24 +47,25 @@ describe("BlindAuction", async () => {
     it("should creates 3 Identity based on user 1 addresses and 2 identity for user2", async () => {
         // this will sign the message(mother wallet address) with user1_walet1 private key then it will create an identity with it.
         const user1_identity1 = new Identity(
-            await user1_walet1.signMessage(ethers.utils.arrayify(ethers.utils.hashMessage(user1_walet1.address)))
+            await user1_walet1.signMessage(ethers.utils.arrayify(ethers.utils.hashMessage(user1_mother_wallet.address)))
         )
         const user1_identity2 = new Identity(
-            await user1_walet1.signMessage(ethers.utils.arrayify(ethers.utils.hashMessage(user1_walet2.address)))
+            await user1_walet2.signMessage(ethers.utils.arrayify(ethers.utils.hashMessage(user1_mother_wallet.address)))
         )
         const user1_identity3 = new Identity(
-            await user1_walet1.signMessage(ethers.utils.arrayify(ethers.utils.hashMessage(user1_walet3.address)))
+            await user1_walet3.signMessage(ethers.utils.arrayify(ethers.utils.hashMessage(user1_mother_wallet.address)))
         )
 
         const user2_identity1 = new Identity(
-            await user1_walet1.signMessage(ethers.utils.arrayify(ethers.utils.hashMessage(user2_walet1.address)))
+            await user2_walet1.signMessage(ethers.utils.arrayify(ethers.utils.hashMessage(user2_mother_wallet.address)))
         )
         const user2_identity2 = new Identity(
-            await user1_walet1.signMessage(ethers.utils.arrayify(ethers.utils.hashMessage(user2_walet2.address)))
+            await user2_walet2.signMessage(ethers.utils.arrayify(ethers.utils.hashMessage(user2_mother_wallet.address)))
         )
 
-        user1_identities.push(new Identity())
-        user2_identities.push(new Identity())
+        user1_identities.push(user1_identity1, user1_identity2, user1_identity3)
+        user2_identities.push(user2_identity1, user2_identity2)
+
         // Implement test for users joining the semaphore group
         // used later to prove how many times they’ve placed a bid without revealing their actual Ethereum addresses.
         it("FIXME user generates a Semaphore identity for each address", async () => {
