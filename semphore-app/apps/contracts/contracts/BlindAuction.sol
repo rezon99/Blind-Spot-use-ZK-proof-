@@ -82,6 +82,8 @@ contract BlindAuction {
     // Function to join the semaphore group
     function joinSemaphoreGroup(uint256 identityCommitment) external payable auction_proof_time_NotEnded {
         require(msg.value == 1 ether, "You need to pay 1 ether for creating 1 Identity commitment.");
+        totalSupply += msg.value;
+        balanceOf[msg.sender] += msg.value; // we don't have to save this inormations. Maybe I should delete it later!
         semaphore.addMember(groupId, identityCommitment);
     }
 
