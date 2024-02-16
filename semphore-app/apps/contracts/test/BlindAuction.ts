@@ -105,6 +105,28 @@ describe("BlindAuction", async () => {
                         "contract balance didn't updated currectly."
                     )
                 }
+                // for user 2
+                for await (const [i, user] of user2_identities.entries()) {
+                    // Ensure that the user sends 1 ether while calling joinSemaphoreGroup
+                    const contractBalanceBefore = await ethers.provider.getBalance(blindAuctionContract.address)
+
+                    const transaction = await blindAuctionContract.joinSemaphoreGroup(user.commitment, {
+                        value: ethers.utils.parseEther("1.0")
+                    })
+                    const addmem = group.addMember(user.commitment)
+
+                    const contractBalanceAfter = await ethers.provider.getBalance(blindAuctionContract.address)
+                    // console.log(contractBalanceBefore)
+                    console.log(transaction)
+                    await expect(transaction)
+                        .to.emit(semaphoreContract, "MemberAdded")
+                        .withArgs(groupId, i + 3, user.commitment, group.root) // need to add 3 because there was 3 identity created for user1
+
+                    expect(contractBalanceAfter.sub(contractBalanceBefore)).to.equal(
+                        ethers.utils.parseEther("1.0"),
+                        "contract balance didn't updated currectly."
+                    )
+                }
             })
         })
 
