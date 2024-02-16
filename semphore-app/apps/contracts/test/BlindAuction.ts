@@ -87,25 +87,24 @@ describe("BlindAuction", async () => {
         describe("# joinGroup", () => {
             it("Should allow users to join the group if paid 1 ether", async () => {
                 // for user 1
-                for await (const user of user1_identities) {
+                for await (const [i, user] of user1_identities.entries()) {
                     // Ensure that the user sends 1 ether while calling joinSemaphoreGroup
-                    const joinTransaction = await blindAuctionContract.joinSemaphoreGroup(user.commitment, {
+                    const contractBalanceBefore = await ethers.provider.getBalance(blindAuctionContract.address)
+                    const transaction = await blindAuctionContract.joinSemaphoreGroup(user.commitment, {
                         value: ethers.utils.parseEther("1.0")
                     })
-                    // // Ensure that the Semaphore contract emits the expected event
-                    // await expect(joinTransaction)
-                    //     .to.emit(semaphoreContract, "MemberAdded")
-                    //     .withArgs(groupId, user1_identities.indexOf(user), user.commitment, group.root)
+                    group.addMember(user.commitment)
+
+                    await expect(transaction)
+                        .to.emit(semaphoreContract, "MemberAdded")
+                        .withArgs(groupId, i, user.commitment, group.root)
+
+                    const contractBalanceAfter = await ethers.provider.getBalance(blindAuctionContract.address)
+                    expect(contractBalanceAfter.sub(contractBalanceBefore)).to.equal(
+                        ethers.utils.parseEther("1.0"),
+                        "contract balance didn't updated currectly."
+                    )
                 }
-                // // for user 2
-                // for await (const user of user2_identities) {
-                //     const joinTransaction = await blindAuctionContract.joinSemaphoreGroup(user.commitment, {
-                //         value: ethers.utils.parseEther("1.0")
-                //     })
-                //     await expect(joinTransaction)
-                //         .to.emit(semaphoreContract, "MemberAdded")
-                //         .withArgs(groupId, user1_identities.indexOf(user), user.commitment, group.root)
-                // }
             })
         })
 
