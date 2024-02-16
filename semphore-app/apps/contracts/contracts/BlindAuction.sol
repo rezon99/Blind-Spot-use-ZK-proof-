@@ -4,7 +4,7 @@ pragma solidity ^0.8.4;
 import "@semaphore-protocol/contracts/interfaces/ISemaphore.sol";
 
 contract BlindAuction {
-    uint256 public totalSupply;
+    uint256 public totalSupply; // we don't need to keep this
     mapping(address => uint256) private balanceOf;
     address public owner; // Auction owner
     uint256 public auctionEndTime; // Auction end time
