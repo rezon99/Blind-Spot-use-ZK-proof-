@@ -1,9 +1,0 @@
-import "hashes/sha256/512bitPacked" as sha256packed;
-
-def main(private field[10] secretBids, field publicTotal) -> bool {
-    field total = 0;
-    for u32 i in 0..10 {
-        total = total + secretBids[i];
-    }
-    return total == publicTotal;
-}
