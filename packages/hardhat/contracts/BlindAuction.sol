@@ -23,12 +23,13 @@ contract BlindAuction is IERC721Receiver, Ownable {
 
 	// Constructor: Initialize auction parameters
 	constructor(
+		address _NFTOwner,
 		uint256 _batchValue,
 		uint256 _durationMinutes,
 		uint256 _auctionRevealTimeMinutes,
 		uint256 _tokenId,
 		address nftContractAddress
-	) Ownable() {
+	) Ownable(_NFTOwner) {
 		batchValue = _batchValue;
 		tokenId = _tokenId;
 		auctionEndTime = block.timestamp + _durationMinutes * 1 minutes;
