@@ -23,7 +23,7 @@ contract BlindAuction is IERC721Receiver, Ownable {
 
 	// Constructor: Initialize auction parameters
 	constructor(
-		address _NFTOwner,
+        address _NFTOwner,
 		uint256 _batchValue,
 		uint256 _durationMinutes,
 		uint256 _auctionRevealTimeMinutes,
