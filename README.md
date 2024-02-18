@@ -1,67 +1,80 @@
-# Blind-Spot-use-ZK-proof-
+# 🏗 Spot Auction
 
-Auction uses ZK proof to hide the amount somma of bids and allows the winner to purchase NFT for his bid.
+<h4 align="center">
+  <a href="https://docs.scaffoldeth.io">Documentation</a> |
+  <a href="https://scaffoldeth.io">Website</a>
+</h4>
 
+🧪 An open-source, up-to-date toolkit for building decentralized applications (dapps) on the Ethereum blockchain. It's designed to make it easier for developers to create and deploy smart contracts and build user interfaces that interact with those contracts.
 
-I want to create a create a blind auction dapp.
-for maintaining the privacy user should send it's bid with up to 50 different address to contract address. for example user want to bid 10ETH so he need to pay 1ETH with 10 different address on 40 other spot would be 0.
+⚙️ Built using NextJS, RainbowKit, Hardhat, Wagmi, Viem, and Typescript.
 
-for user will use it's semaphore Identity to prove that he paid 10 time.
+- ✅ **Contract Hot Reload**: Your frontend auto-adapts to your smart contract as you edit it.
+- 🪝 **[Custom hooks](https://docs.scaffoldeth.io/hooks/)**: Collection of React hooks wrapper around [wagmi](https://wagmi.sh/) to simplify interactions with smart contracts with typescript autocompletion.
+- 🧱 [**Components**](https://docs.scaffoldeth.io/components/): Collection of common web3 components to quickly build your frontend.
+- 🔥 **Burner Wallet & Local Faucet**: Quickly test your application with a burner wallet and local faucet.
+- 🔐 **Integration with Wallet Providers**: Connect to different wallet providers and interact with the Ethereum network.
 
-so send 1 eth and in tx message sign it with your address and nullifier to be able to prove that you paid 1 ether
+![Debug Contracts tab](https://github.com/scaffold-eth/scaffold-eth-2/assets/55535804/b237af0c-5027-4849-a5c1-2e31495cccb1)
 
-how to connect different addresses?
+## Requirements
 
-each time that some one pay 1 eth to contract address contract will add it to Semphore group.
-user need to provide group id for auction.
+Before you begin, you need to install the following tools:
 
-reveal time
-user should reveal its identities and provide an address to send the nft to him if he won or send it's ETH back if he lost 
+- [Node (>= v18.17)](https://nodejs.org/en/download/)
+- Yarn ([v1](https://classic.yarnpkg.com/en/docs/install/) or [v2+](https://yarnpkg.com/getting-started/install))
+- [Git](https://git-scm.com/downloads)
 
-so it would be 10 different identity that paid 1 eth. then at the end users reveal their identity by signing a transaction and show that how many ether their paid. anyone who paid more would be the winner.
+## Quickstart
 
+To get started with Spot Auction, follow the steps below:
 
+1. Clone this repo & install dependencies
 
-## break down
+```
+git clone https://github.com/scaffold-eth/scaffold-eth-2.git
+cd scaffold-eth-2
+yarn install
+```
 
+2. Run a local network in the first terminal:
 
-Creating a blind auction DApp with privacy considerations is an interesting challenge! Let's break down the steps to achieve this:
+```
+yarn chain
+```
 
-1. **Smart Contract Design**:
-    - You'll need a smart contract that handles the auction logic, including bid submission, verification, and winner determination.
-    - Define a struct to store each user's bids, including the amount and the associated addresses.
-    - Use a mapping to associate group IDs with user bids.
+This command starts a local Ethereum network using Hardhat. The network runs on your local machine and can be used for testing and development. You can customize the network configuration in `hardhat.config.ts`.
 
-2. **Bid Submission**:
-    - Users submit their bids by sending 1 ETH from up to 50 different addresses.
-    - Each bid includes the user's address and a unique nullifier (a random value).
-    - The contract verifies that the total amount sent is 1 ETH.
+3. On a second terminal, deploy the test contract:
 
-3. **Semaphore Identity**:
-    - Users prove their bids using their semaphore identity.
-    - When submitting a bid, users sign a message containing their address and nullifier.
-    - The contract verifies the signature against the user's address.
+```
+yarn deploy
+```
 
-4. **Grouping Bids**:
-    - Each time someone pays 1 ETH to the contract address, the contract adds it to a semaphore group.
-    - The group ID is associated with the auction.
+This command deploys a test smart contract to the local network. The contract is located in `packages/hardhat/contracts` and can be modified to suit your needs. The `yarn deploy` command uses the deploy script located in `packages/hardhat/deploy` to deploy the contract to the network. You can also customize the deploy script.
 
-5. **Revealing Bids**:
-    - At the end of the auction, users reveal their identity by signing a transaction.
-    - They provide the number of ETH they paid (e.g., 10 times 1 ETH).
-    - The contract verifies the revealed amount against the stored bids.
+4. On a third terminal, start your NextJS app:
 
-6. **Determining the Winner**:
-    - The user who paid the most ETH wins the auction.
-    - The contract transfers the auctioned item to the winner.
+```
+yarn start
+```
 
-7. **Privacy Considerations**:
-    - Users' bids are private during the auction.
-    - The semaphore identity ensures that only valid bids are considered.
-    - The nullifier prevents double-spending.
+Visit your app on: `http://localhost:3000`. You can interact with your smart contract using the `Debug Contracts` page. You can tweak the app config in `packages/nextjs/scaffold.config.ts`.
 
-8. **Connecting Different Addresses**:
-    - To connect different addresses, you can use an interface between two smart contracts.
-    - Deploy a separate contract (e.g., `XYZ`) that contains the relevant methods.
-    - In your auction contract (e.g., `ABC`), store the address of the deployed `XYZ` contract.
-    - Call the methods of `XYZ` from `ABC` using the stored address.
+Run smart contract test with `yarn hardhat:test`
+
+- Edit your smart contract `YourContract.sol` in `packages/hardhat/contracts`
+- Edit your frontend in `packages/nextjs/pages`
+- Edit your deployment scripts in `packages/hardhat/deploy`
+
+## Documentation
+
+Visit our [docs](https://docs.scaffoldeth.io) to learn how to start building with Spot Auction.
+
+To know more about its features, check out our [website](https://scaffoldeth.io).
+
+## Contributing to Spot Auction
+
+We welcome contributions to Spot Auction!
+
+Please see [CONTRIBUTING.MD](https://github.com/scaffold-eth/scaffold-eth-2/blob/main/CONTRIBUTING.md) for more information and guidelines for contributing to Spot Auction.
