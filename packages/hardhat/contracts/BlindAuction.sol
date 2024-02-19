@@ -23,7 +23,7 @@ contract BlindAuction is IERC721Receiver, Ownable {
 
 	// Constructor: Initialize auction parameters
 	constructor(
-        address _NFTOwner,
+		address _NFTOwner,
 		uint256 _batchValue,
 		uint256 _durationMinutes,
 		uint256 _auctionRevealTimeMinutes,
@@ -103,7 +103,7 @@ contract BlindAuction is IERC721Receiver, Ownable {
 	}
 
 	function checkForHighestBidder() public {
-		require(bids[msg.sender] > highestBid, "your not the highest bidder"); //FIXME what should happend in case of to address to be equal
+		require(bids[msg.sender] > highestBid, "your not the highest bidder"); // FIXME what should happend in case of to address to be equal
 		highestBid = bids[msg.sender];
 		highestBidder = msg.sender;
 	}
@@ -143,12 +143,17 @@ contract BlindAuction is IERC721Receiver, Ownable {
 		checkForHighestBidder();
 	}
 
-	// End the auction and transfer the item to the highest bidder
 	function endAuction() public {
 		require(block.timestamp >= auctionEndTime, "Auction not yet ended");
 		require(!auctionEnded, "Auction already ended");
-
 		auctionEnded = true;
+		// if NFT owner take it's approve back it will end the Auction ands and everyone use claimAsLoser
+		require(nftContract.getApproved(tokenId) == address(this), "owner toke it's approve back!");
+
+		if (highestBid == 0) {
+			// No one participated in the auction, handle this case (e.g., revert, refund, etc.)
+			revert("No bids received"); // FIXME send
+		}
 
 		address previousHighestBidder = highestBidder;
 		uint256 previousHighestBid = highestBid;
@@ -171,8 +176,6 @@ contract BlindAuction is IERC721Receiver, Ownable {
 			payable(msg.sender).transfer(bidAmount);
 		}
 	}
-
-	// End the auction and transfer the item to the highest bidder
 
 	// ERC721 callback function
 	function onERC721Received(
